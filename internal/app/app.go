@@ -6,6 +6,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"syscall"
 	"time"
@@ -35,11 +36,17 @@ type Application struct {
 }
 
 // NewApplication initializes and returns an application struct
-func NewApplication(ctx context.Context, cancelFn context.CancelFunc, config types.Config, waitReadyTimeout time.Duration, logger *zap.Logger) (*Application, error) {
+func NewApplication(ctx context.Context, cancelFn context.CancelFunc, config types.Config, waitReadyTimeout time.Duration, etcdWrapperServerPort int64, logger *zap.Logger) (*Application, error) {
 	logger.Info("Initializing application", zap.Any("config", config))
 	etcdInitializer, err := bootstrap.NewEtcdInitializer(&config.BackupRestore, logger)
 	if err != nil {
 		return nil, err
+	}
+	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%d", etcdWrapperServerPort),
+		Handler:           mux,
+		ReadHeaderTimeout: etcdWrapperReadHeaderTimeout,
 	}
 	return &Application{
 		ctx:              ctx,
@@ -48,6 +55,7 @@ func NewApplication(ctx context.Context, cancelFn context.CancelFunc, config typ
 		etcdInitializer:  etcdInitializer,
 		waitReadyTimeout: waitReadyTimeout,
 		logger:           logger,
+		server:           server,
 	}, nil
 }
 

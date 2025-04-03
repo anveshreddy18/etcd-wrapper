@@ -43,7 +43,8 @@ Flags:
 	}
 	config = types.Config{}
 	// etcdReadyTimeout is the timeout for an embedded etcd server to be ready.
-	etcdReadyTimeout time.Duration
+	etcdReadyTimeout      time.Duration
+	etcdWrapperServerPort int64
 )
 
 // AddEtcdFlags adds flags from the parsed FlagSet into application structs
@@ -55,11 +56,12 @@ func AddEtcdFlags(fs *flag.FlagSet) {
 	fs.StringVar(&config.EtcdClientTLS.CertPath, "etcd-client-cert-path", "", "File path of ETCD client certificate to help establish TLS communication of the client to ETCD")
 	fs.StringVar(&config.EtcdClientTLS.KeyPath, "etcd-client-key-path", "", "File path of ETCD client key to help establish TLS communication of the client to ETCD")
 	fs.DurationVar(&etcdReadyTimeout, "etcd-ready-timeout", 0, "Time duration to wait for etcd to be ready")
+	fs.Int64Var(&etcdWrapperServerPort, "etcd-wrapper-server-port", types.DefaultEtcdWrapperServerPort, "Port on which etcd-wrapper server will be exposed")
 }
 
 // InitAndStartEtcd sets up and starts an embedded etcd
 func InitAndStartEtcd(ctx context.Context, cancelFn context.CancelFunc, logger *zap.Logger) error {
-	etcdApp, err := app.NewApplication(ctx, cancelFn, config, etcdReadyTimeout, logger)
+	etcdApp, err := app.NewApplication(ctx, cancelFn, config, etcdReadyTimeout, etcdWrapperServerPort, logger)
 	if err != nil {
 		return err
 	}

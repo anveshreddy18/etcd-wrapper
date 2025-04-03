@@ -20,8 +20,6 @@ import (
 )
 
 const (
-	// ServerPort is the port number for the http server of etcd wrapper
-	ServerPort                   = int64(9095)
 	etcdEndpointPort             = "2379"
 	etcdWrapperReadHeaderTimeout = 5 * time.Second
 	etcdConnectionTimeout        = 5 * time.Second
@@ -115,7 +113,7 @@ func (a *Application) stopEtcdHandler(w http.ResponseWriter, req *http.Request) 
 func (a *Application) startHTTPServer() {
 	a.logger.Info(
 		"Starting HTTP server at addr",
-		zap.Int64("Port No: ", ServerPort),
+		zap.Int64("Port No: ", a.server.Addr),
 	)
 	a.RegisterHandler()
 	if !a.isTLSEnabled() {
@@ -141,14 +139,8 @@ func (a *Application) stopHTTPServer() error {
 
 // RegisterHandler registers the handler for different requests
 func (a *Application) RegisterHandler() {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/readyz", a.readinessHandler)
+	a.server.Handler.HandleFunc("/readyz", a.readinessHandler)
 	mux.HandleFunc("/stop", a.stopEtcdHandler)
 
-	a.server = &http.Server{
-		Addr:              fmt.Sprintf(":%d", ServerPort),
-		Handler:           mux,
-		ReadHeaderTimeout: etcdWrapperReadHeaderTimeout,
-	}
+	a.server
 }

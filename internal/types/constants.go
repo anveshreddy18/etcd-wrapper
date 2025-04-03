@@ -11,6 +11,8 @@ const (
 	DefaultBackupRestoreTLSEnabled = false
 	// DefaultBackupRestoreHostPort defines the default sidecar host and port
 	DefaultBackupRestoreHostPort = ":8080"
+	// DefaultEtcdWrapperServerPort defines the default port for the etcd wrapper server
+	DefaultEtcdWrapperServerPort = int64(9095)
 	// DefaultExitCodeFilePath defines the default file path for the file that stores the exit code of the previous run
 	DefaultExitCodeFilePath = "/var/etcd/data/exit_code"
 	// ValidationMarkerFilePath defines the file path to the legacy file that was used to record exit code of the previous run
